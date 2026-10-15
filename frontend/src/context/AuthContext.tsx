@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useEffect } from 'react';
+import React, { createContext, useContext, useState } from 'react';
 import { User, Role } from '../types';
 
 interface AuthContextType {
@@ -16,7 +16,7 @@ interface AuthContextType {
   demoUsers: Record<Role, User>;
 }
 
-export const DEMO_PROFILES: Record<Role, User> = {
+const DEMO_PROFILES: Record<Role, User> = {
   farmer: {
     uid: "farmer-ramesh-01",
     displayName: "Ramesh Kumar",
