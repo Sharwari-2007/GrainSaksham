@@ -5,18 +5,13 @@ import {
   TrendingUp, 
   ShoppingBag, 
   Scale, 
-  Plus, 
   ArrowRight, 
-  Calendar, 
-  CheckCircle2, 
-  Sparkles,
-  Search,
-  UserCheck
+  Search, 
+  UserCheck 
 } from 'lucide-react';
 import { api } from '../api';
 import { InspectionRecord } from '../types';
 import { useAuth } from '../context/AuthContext';
-import { useTranslation } from '../context/LanguageContext';
 
 interface FarmerDashboardProps {
   onNavigate: (view: string) => void;
@@ -27,27 +22,36 @@ export const FarmerDashboard: React.FC<FarmerDashboardProps> = ({
   onNavigate, 
   onSelectInspection 
 }) => {
-  const { t } = useTranslation();
   const { currentUser } = useAuth();
   const [inspections, setInspections] = useState<InspectionRecord[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
 
   useEffect(() => {
-    fetchInspections();
-  }, [currentUser]);
+    let isMounted = true;
+    const fetchInspections = async () => {
+      try {
+        const data = await api.getInspections(currentUser.uid);
+        if (isMounted) {
+          setInspections(data);
+        }
+      } catch (err) {
+        if (isMounted) {
+          console.error('Error fetching inspections:', err);
+        }
+      } finally {
+        if (isMounted) {
+          setLoading(false);
+        }
+      }
+    };
 
-  const fetchInspections = async () => {
-    try {
-      setLoading(true);
-      const data = await api.getInspections(currentUser.uid);
-      setInspections(data);
-    } catch (err) {
-      console.error('Error fetching inspections:', err);
-    } finally {
-      setLoading(false);
-    }
-  };
+    fetchInspections();
+
+    return () => {
+      isMounted = false;
+    };
+  }, [currentUser.uid]);
 
   const filtered = inspections.filter(i => 
     i.variety.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -222,7 +226,7 @@ export const FarmerDashboard: React.FC<FarmerDashboardProps> = ({
                       </span>
                     </td>
                     <td className="px-4 py-3.5 font-bold text-emerald-700">
-                      {item.metrics.sound_grain.percentage}%
+                      {item.metrics?.sound_grain?.percentage ?? 0}%
                     </td>
                     <td className="px-4 py-3.5 text-stone-500">
                       {new Date(item.createdAt).toLocaleDateString()}
