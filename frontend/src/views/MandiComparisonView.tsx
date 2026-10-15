@@ -1,14 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { 
   TrendingUp, 
-  MapPin, 
-  Calendar, 
   Calculator, 
   Filter, 
-  CheckCircle2, 
-  Info, 
-  ArrowUpDown, 
-  Sparkles 
+  Info 
 } from 'lucide-react';
 import { 
   LineChart, 
@@ -50,25 +45,35 @@ export const MandiComparisonView: React.FC = () => {
   ];
 
   useEffect(() => {
-    fetchPrices();
-  }, [selectedCrop, selectedState]);
-
-  const fetchPrices = async () => {
-    try {
-      setLoading(true);
-      const cropQuery = selectedCrop !== 'All' ? selectedCrop : undefined;
-      const stateQuery = selectedState !== 'All' ? selectedState : undefined;
-      const data = await api.getMarketPrices(cropQuery, stateQuery);
-      setPrices(data);
-      if (data.length > 0 && !calcSelectedPrice) {
-        setCalcSelectedPrice(data[0].modalPrice);
+    let isMounted = true;
+    const loadPrices = async () => {
+      try {
+        const cropQuery = selectedCrop !== 'All' ? selectedCrop : undefined;
+        const stateQuery = selectedState !== 'All' ? selectedState : undefined;
+        const data = await api.getMarketPrices(cropQuery, stateQuery);
+        if (isMounted) {
+          setPrices(data);
+          if (data.length > 0 && !calcSelectedPrice) {
+            setCalcSelectedPrice(data[0].modalPrice);
+          }
+        }
+      } catch (err) {
+        if (isMounted) {
+          console.error('Error fetching market prices:', err);
+        }
+      } finally {
+        if (isMounted) {
+          setLoading(false);
+        }
       }
-    } catch (err) {
-      console.error('Error fetching market prices:', err);
-    } finally {
-      setLoading(false);
-    }
-  };
+    };
+
+    loadPrices();
+
+    return () => {
+      isMounted = false;
+    };
+  }, [selectedCrop, selectedState, calcSelectedPrice]);
 
   // Calculations
   const grossValue = calcQuantity * calcSelectedPrice;
