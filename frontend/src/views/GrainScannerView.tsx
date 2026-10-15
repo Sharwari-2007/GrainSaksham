@@ -4,15 +4,11 @@ import {
   Upload, 
   Camera, 
   CheckCircle2, 
-  AlertTriangle, 
-  AlertOctagon,
-  FileText, 
+  AlertOctagon, 
   Sparkles, 
   RefreshCw, 
   ArrowRight, 
   Info, 
-  Eye, 
-  HelpCircle,
   FileCheck,
   TrendingUp,
   X
@@ -39,7 +35,7 @@ export const GrainScannerView: React.FC<GrainScannerViewProps> = ({
   // State
   const [selectedCrop, setSelectedCrop] = useState<string>('wheat');
   const [variety, setVariety] = useState<string>('HD-2967 (Sharbati Hybrid)');
-  const [lotIdentifier, setLotIdentifier] = useState<string>(`LOT-PB-SAM-${Math.floor(10 + Math.random() * 90)}`);
+  const [lotIdentifier, setLotIdentifier] = useState<string>(() => `LOT-PB-SAM-${Math.floor(10 + Math.random() * 90)}`);
   const [mandiLocation, setMandiLocation] = useState<string>('Khanna Mandi, Ludhiana, Punjab');
   const [moistureReading, setMoistureReading] = useState<string>('11.8');
   
