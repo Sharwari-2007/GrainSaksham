@@ -1,6 +1,10 @@
 import { InspectionRecord, MarketPrice, QualityPassport, Listing, BuyerOffer, GradeDispute } from './types';
 
-const API_BASE_URL = 'http://127.0.0.1:8000/api';
+const isLocalVite = typeof window !== 'undefined' && 
+  (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') && 
+  window.location.port === '5173';
+
+const API_BASE_URL = isLocalVite ? 'http://127.0.0.1:8000/api' : '/api';
 
 // Offline Draft Storage Key
 const OFFLINE_DRAFTS_KEY = 'grainsaksham_offline_drafts';
@@ -54,7 +58,7 @@ export const api = {
       const res = await fetch(url);
       if (!res.ok) throw new Error('Failed to load inspections');
       return await res.json();
-    } catch (err) {
+    } catch {
       console.warn('Falling back to local cached inspections');
       return [];
     }
