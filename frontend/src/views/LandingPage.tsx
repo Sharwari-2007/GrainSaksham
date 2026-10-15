@@ -5,7 +5,6 @@ import {
   Scale, 
   Lightbulb, 
   ShoppingBag, 
-  ShieldCheck, 
   CheckCircle2, 
   ArrowRight, 
   QrCode, 
