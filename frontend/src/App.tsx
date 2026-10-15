@@ -22,7 +22,7 @@ import { InspectionRecord } from './types';
 import { api } from './api';
 
 const AppContent: React.FC = () => {
-  const { currentUser, logout } = useAuth();
+  const { currentUser } = useAuth();
   
   // Default to 'auth' first (Signup/Login interface for Farmer, Buyer, Admin) unless navigated
   const [activeView, setActiveView] = useState<string>(() => {
@@ -39,14 +39,10 @@ const AppContent: React.FC = () => {
 
   const [selectedInspection, setSelectedInspection] = useState<InspectionRecord | null>(null);
   const [publicVerifyId, setPublicVerifyId] = useState<string>('GS-WHT-2026-8942');
-  const [offlineDraftsCount, setOfflineDraftsCount] = useState<number>(0);
+  const [offlineDraftsCount] = useState<number>(() => api.getOfflineDrafts().length);
   const [isOnline, setIsOnline] = useState<boolean>(navigator.onLine);
 
   useEffect(() => {
-    // Check initial offline drafts
-    const drafts = api.getOfflineDrafts();
-    setOfflineDraftsCount(drafts.length);
-
     // Online/Offline event listeners
     const handleOnline = () => setIsOnline(true);
     const handleOffline = () => setIsOnline(false);
