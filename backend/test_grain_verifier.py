@@ -7,6 +7,8 @@ def verify_and_segment_grain_sample(img_bgr, crop_type='wheat'):
     (such as wheat, paddy, maize, pulses) or an arbitrary non-grain photograph
     (such as an animal, person, car, furniture, or outdoor scenery).
     """
+    if img_bgr is None:
+        return False, "Could not load or decode image (image is None).", {}
     h, w, _ = img_bgr.shape
     total_px = h * w
     hsv = cv2.cvtColor(img_bgr, cv2.COLOR_BGR2HSV)
@@ -155,8 +157,10 @@ def verify_and_segment_grain_sample(img_bgr, crop_type='wheat'):
     }
 
 if __name__ == '__main__':
+    import os
     # 1. Real wheat
-    img_wheat = cv2.imread('data/sample_wheat.jpg')
+    sample_path = os.path.join(os.path.dirname(__file__), 'data', 'sample_wheat.jpg')
+    img_wheat = cv2.imread(sample_path)
     ok, msg, data = verify_and_segment_grain_sample(img_wheat)
     print("Real Wheat Test Result:", ok, "->", msg)
     if ok:
