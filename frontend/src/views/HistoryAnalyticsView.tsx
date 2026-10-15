@@ -1,16 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { 
   History, 
-  BarChart3, 
   Filter, 
   Search, 
-  Calendar, 
   FileCheck, 
-  Download, 
   WifiOff, 
   RefreshCw, 
-  Trash2, 
-  Check 
+  Trash2 
 } from 'lucide-react';
 import { 
   BarChart, 
@@ -40,7 +36,7 @@ export const HistoryAnalyticsView: React.FC<HistoryAnalyticsViewProps> = ({
 }) => {
   const { t } = useTranslation();
   const [inspections, setInspections] = useState<InspectionRecord[]>([]);
-  const [offlineDrafts, setOfflineDrafts] = useState<OfflineDraft[]>([]);
+  const [offlineDrafts, setOfflineDrafts] = useState<OfflineDraft[]>(() => api.getOfflineDrafts());
   const [loading, setLoading] = useState(true);
   const [syncingId, setSyncingId] = useState<string | null>(null);
 
@@ -48,22 +44,44 @@ export const HistoryAnalyticsView: React.FC<HistoryAnalyticsViewProps> = ({
   const [search, setSearch] = useState('');
   const [statusFilter, setStatusFilter] = useState('ALL');
 
-  useEffect(() => {
-    loadData();
-  }, []);
-
   const loadData = async () => {
     try {
-      setLoading(true);
       const data = await api.getInspections();
       setInspections(data);
       setOfflineDrafts(api.getOfflineDrafts());
     } catch (err) {
-      console.error('Error loading history:', err);
+      console.error('Failed to load inspections:', err);
     } finally {
       setLoading(false);
     }
   };
+
+  useEffect(() => {
+    let isMounted = true;
+    const fetchInspections = async () => {
+      try {
+        const data = await api.getInspections();
+        if (isMounted) {
+          setInspections(data);
+          setOfflineDrafts(api.getOfflineDrafts());
+        }
+      } catch (err) {
+        if (isMounted) {
+          console.error('Failed to load inspections:', err);
+        }
+      } finally {
+        if (isMounted) {
+          setLoading(false);
+        }
+      }
+    };
+
+    fetchInspections();
+
+    return () => {
+      isMounted = false;
+    };
+  }, []);
 
   const handleSyncDraft = async (draft: OfflineDraft) => {
     try {
