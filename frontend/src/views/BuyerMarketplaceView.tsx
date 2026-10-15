@@ -2,9 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { 
   ShoppingBag, 
   Search, 
-  Filter, 
   MapPin, 
-  CheckCircle2, 
   Plus, 
   FileCheck, 
   Send, 
@@ -12,13 +10,13 @@ import {
   Check 
 } from 'lucide-react';
 import { api } from '../api';
-import { Listing, BuyerOffer } from '../types';
+import { Listing } from '../types';
 import { useAuth } from '../context/AuthContext';
 import { useTranslation } from '../context/LanguageContext';
 
 export const BuyerMarketplaceView: React.FC<{ onNavigate: (view: string) => void }> = ({ onNavigate }) => {
   const { t } = useTranslation();
-  const { currentUser, isFarmer, isBuyer } = useAuth();
+  const { currentUser } = useAuth();
   
   const [listings, setListings] = useState<Listing[]>([]);
   const [loading, setLoading] = useState(true);
@@ -41,13 +39,8 @@ export const BuyerMarketplaceView: React.FC<{ onNavigate: (view: string) => void
   const [offerMessage, setOfferMessage] = useState<string>('We have reviewed your verified quality passport and can lift directly from your farm gate.');
   const [offerSubmitted, setOfferSubmitted] = useState(false);
 
-  useEffect(() => {
-    fetchListings();
-  }, []);
-
   const fetchListings = async () => {
     try {
-      setLoading(true);
       const data = await api.getListings();
       setListings(data);
     } catch (err) {
@@ -56,6 +49,32 @@ export const BuyerMarketplaceView: React.FC<{ onNavigate: (view: string) => void
       setLoading(false);
     }
   };
+
+  useEffect(() => {
+    let isMounted = true;
+    const loadListings = async () => {
+      try {
+        const data = await api.getListings();
+        if (isMounted) {
+          setListings(data);
+        }
+      } catch (err) {
+        if (isMounted) {
+          console.error('Error fetching listings:', err);
+        }
+      } finally {
+        if (isMounted) {
+          setLoading(false);
+        }
+      }
+    };
+
+    loadListings();
+
+    return () => {
+      isMounted = false;
+    };
+  }, []);
 
   const handleCreateListing = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -268,6 +287,17 @@ export const BuyerMarketplaceView: React.FC<{ onNavigate: (view: string) => void
                   type="text"
                   value={newVariety}
                   onChange={(e) => setNewVariety(e.target.value)}
+                  className="w-full px-3.5 py-2 rounded-xl border border-stone-300 text-xs bg-white"
+                  required
+                />
+              </div>
+
+              <div>
+                <label className="block text-xs font-bold text-stone-700 mb-1">Lot Identifier</label>
+                <input
+                  type="text"
+                  value={newLotId}
+                  onChange={(e) => setNewLotId(e.target.value)}
                   className="w-full px-3.5 py-2 rounded-xl border border-stone-300 text-xs bg-white"
                   required
                 />
