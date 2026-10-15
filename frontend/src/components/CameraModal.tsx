@@ -10,45 +10,57 @@ interface CameraModalProps {
 export const CameraModal: React.FC<CameraModalProps> = ({ isOpen, onClose, onCapture }) => {
   const videoRef = useRef<HTMLVideoElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
-  const [stream, setStream] = useState<MediaStream | null>(null);
+  const streamRef = useRef<MediaStream | null>(null);
   const [capturedPreview, setCapturedPreview] = useState<string | null>(null);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
 
   useEffect(() => {
+    let isCancelled = false;
+
     if (isOpen) {
-      startCamera();
+      if (navigator.mediaDevices?.getUserMedia) {
+        navigator.mediaDevices.getUserMedia({
+          video: { facingMode: 'environment', width: { ideal: 1280 }, height: { ideal: 960 } }
+        })
+        .then((mediaStream) => {
+          if (isCancelled) {
+            mediaStream.getTracks().forEach(t => t.stop());
+            return;
+          }
+          setErrorMsg(null);
+          streamRef.current = mediaStream;
+          if (videoRef.current) {
+            videoRef.current.srcObject = mediaStream;
+          }
+        })
+        .catch((err) => {
+          if (!isCancelled) {
+            console.error('Camera access error:', err);
+            setErrorMsg('Could not access device camera. Please check camera permissions or upload an image file instead.');
+          }
+        });
+      } else {
+        Promise.resolve().then(() => {
+          if (!isCancelled) {
+            setErrorMsg('Camera access is not supported in this browser.');
+          }
+        });
+      }
     } else {
-      stopCamera();
-      setCapturedPreview(null);
-      setErrorMsg(null);
+      if (streamRef.current) {
+        streamRef.current.getTracks().forEach(track => track.stop());
+        streamRef.current = null;
+      }
     }
+
     return () => {
-      stopCamera();
+      isCancelled = true;
+      if (streamRef.current) {
+        streamRef.current.getTracks().forEach(track => track.stop());
+        streamRef.current = null;
+      }
     };
   }, [isOpen]);
-
-  const startCamera = async () => {
-    try {
-      setErrorMsg(null);
-      const mediaStream = await navigator.mediaDevices.getUserMedia({
-        video: { facingMode: 'environment', width: { ideal: 1280 }, height: { ideal: 960 } }
-      });
-      setStream(mediaStream);
-      if (videoRef.current) {
-        videoRef.current.srcObject = mediaStream;
-      }
-    } catch (err: any) {
-      console.error('Camera access error:', err);
-      setErrorMsg('Could not access device camera. Please check camera permissions or upload an image file instead.');
-    }
-  };
-
-  const stopCamera = () => {
-    if (stream) {
-      stream.getTracks().forEach(track => track.stop());
-      setStream(null);
-    }
-  };
 
   const handleSnap = () => {
     if (videoRef.current && canvasRef.current) {
