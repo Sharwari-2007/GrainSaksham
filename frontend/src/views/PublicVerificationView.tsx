@@ -1,13 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import { 
   ShieldCheck, 
-  CheckCircle2, 
   AlertCircle, 
-  FileText, 
   ArrowLeft, 
-  Calendar, 
-  MapPin, 
-  Sparkles,
   Lock
 } from 'lucide-react';
 import { api } from '../api';
