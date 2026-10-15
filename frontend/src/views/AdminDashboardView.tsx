@@ -1,22 +1,13 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { 
   ShieldCheck, 
   Users, 
   Sliders, 
-  FileText, 
-  AlertTriangle, 
-  CheckCircle2, 
-  Clock, 
-  Save, 
-  Scale, 
-  Cpu 
+  Save 
 } from 'lucide-react';
-import { api } from '../api';
 import { useAuth } from '../context/AuthContext';
-import { useTranslation } from '../context/LanguageContext';
 
 export const AdminDashboardView: React.FC = () => {
-  const { t } = useTranslation();
   const { currentUser, isAdmin } = useAuth();
   
   // State for standards configuration
