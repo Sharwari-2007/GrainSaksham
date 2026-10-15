@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from 'react';
-import { Volume2, VolumeX, Loader2 } from 'lucide-react';
+import React, { useState } from 'react';
+import { Volume2, VolumeX } from 'lucide-react';
 import { useTranslation } from '../context/LanguageContext';
 
 interface SpeechReaderProps {
@@ -11,13 +11,7 @@ interface SpeechReaderProps {
 export const SpeechReader: React.FC<SpeechReaderProps> = ({ textToRead, label = "Listen to Findings", className = "" }) => {
   const { language } = useTranslation();
   const [isSpeaking, setIsSpeaking] = useState(false);
-  const [isSupported, setIsSupported] = useState(false);
-
-  useEffect(() => {
-    if (typeof window !== 'undefined' && 'speechSynthesis' in window) {
-      setIsSupported(true);
-    }
-  }, []);
+  const [isSupported] = useState(() => typeof window !== 'undefined' && 'speechSynthesis' in window);
 
   const handleToggleSpeech = () => {
     if (!isSupported) return;
