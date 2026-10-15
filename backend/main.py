@@ -6,10 +6,16 @@ farmer-buyer grade dispute comparison, and administrator governance.
 """
 
 import os
+import sys
 import uuid
 import base64
 from datetime import datetime
 from typing import Optional, List, Dict, Any
+
+# Ensure backend directory is in sys.path so sibling modules resolve regardless of working directory
+BACKEND_DIR = os.path.dirname(os.path.abspath(__file__))
+if BACKEND_DIR not in sys.path:
+    sys.path.insert(0, BACKEND_DIR)
 
 from fastapi import FastAPI, UploadFile, File, Form, HTTPException, Query, status
 from fastapi.middleware.cors import CORSMiddleware
@@ -17,8 +23,12 @@ from fastapi.responses import JSONResponse
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel, Field
 
-import database as db
-from ai_scanner import analyze_wheat_sample, check_image_clarity
+try:
+    import database as db
+    from ai_scanner import analyze_wheat_sample, check_image_clarity
+except ImportError:
+    from backend import database as db
+    from backend.ai_scanner import analyze_wheat_sample, check_image_clarity
 
 UPLOAD_DIR = os.path.join(os.path.dirname(__file__), "data", "uploads")
 os.makedirs(UPLOAD_DIR, exist_ok=True)
@@ -233,8 +243,8 @@ async def analyze_inspection(
         "annotatedImage": cv_result.get("annotated_image", ""),
         "originalImagePath": f"backend/data/uploads/{original_filename}",
         "annotatedImagePath": f"backend/data/uploads/{annotated_filename}",
-        "originalImageUrl": f"http://127.0.0.1:8000/uploads/{original_filename}",
-        "annotatedImageUrl": f"http://127.0.0.1:8000/uploads/{annotated_filename}",
+        "originalImageUrl": f"/uploads/{original_filename}",
+        "annotatedImageUrl": f"/uploads/{annotated_filename}",
         "isPubliclyShared": True,
         "createdAt": datetime.utcnow().isoformat() + "Z",
         "updatedAt": datetime.utcnow().isoformat() + "Z"
@@ -453,6 +463,28 @@ def get_analytics():
         ]
     }
 
+# Serve production frontend SPA if built in frontend/dist
+FRONTEND_DIST = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "frontend", "dist"))
+if os.path.isdir(FRONTEND_DIST):
+    from fastapi.responses import FileResponse
+    assets_dir = os.path.join(FRONTEND_DIST, "assets")
+    if os.path.isdir(assets_dir):
+        app.mount("/assets", StaticFiles(directory=assets_dir), name="frontend-assets")
+
+    @app.get("/{full_path:path}")
+    async def serve_frontend_spa(full_path: str):
+        if full_path.startswith("api") or full_path.startswith("uploads") or full_path.startswith("docs") or full_path.startswith("openapi.json"):
+            raise HTTPException(status_code=404, detail="Endpoint not found")
+        file_path = os.path.join(FRONTEND_DIST, full_path)
+        if full_path and os.path.isfile(file_path):
+            return FileResponse(file_path)
+        index_file = os.path.join(FRONTEND_DIST, "index.html")
+        if os.path.isfile(index_file):
+            return FileResponse(index_file)
+        raise HTTPException(status_code=404, detail="Frontend index.html not found")
+
 if __name__ == "__main__":
     import uvicorn
-    uvicorn.run("main:app", host="127.0.0.1", port=8000, reload=True)
+    port = int(os.environ.get("PORT", 8000))
+    host = os.environ.get("HOST", "0.0.0.0")
+    uvicorn.run("main:app", host=host, port=port, reload=True)
