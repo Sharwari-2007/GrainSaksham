@@ -6,10 +6,7 @@ import {
   Sun, 
   Archive, 
   CheckCircle2, 
-  ArrowRight, 
-  Scan,
-  ShieldCheck,
-  Sparkles
+  Scan
 } from 'lucide-react';
 import { useTranslation } from '../context/LanguageContext';
 import { SpeechReader } from '../components/SpeechReader';
