@@ -47,8 +47,10 @@ def upload_test(filename, file_bytes):
         return e.code, err_data
 
 if __name__ == '__main__':
+    import os
     # 1. Real Wheat Test
-    with open('data/sample_wheat.jpg', 'rb') as f:
+    sample_path = os.path.join(os.path.dirname(__file__), 'data', 'sample_wheat.jpg')
+    with open(sample_path, 'rb') as f:
         wheat_bytes = f.read()
     code, data = upload_test('sample_wheat.jpg', wheat_bytes)
     print("HTTP Test 1 - Real Wheat Sample:")
