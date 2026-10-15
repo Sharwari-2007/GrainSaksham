@@ -1,15 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { 
-  Scale, 
-  CheckCircle2, 
-  AlertTriangle, 
-  Clock, 
-  MessageSquare, 
-  FileCheck, 
-  ShieldAlert, 
-  Plus, 
-  RefreshCw 
-} from 'lucide-react';
+import { Scale } from 'lucide-react';
 import { api } from '../api';
 import { GradeDispute } from '../types';
 import { useAuth } from '../context/AuthContext';
@@ -17,7 +7,7 @@ import { useTranslation } from '../context/LanguageContext';
 
 export const FarmerBuyerComparisonView: React.FC = () => {
   const { t } = useTranslation();
-  const { currentUser, isFarmer, isBuyer, isAdmin } = useAuth();
+  const { currentUser } = useAuth();
   
   const [disputes, setDisputes] = useState<GradeDispute[]>([]);
   const [activeDispute, setActiveDispute] = useState<GradeDispute | null>(null);
@@ -28,13 +18,8 @@ export const FarmerBuyerComparisonView: React.FC = () => {
   const [targetStatus, setTargetStatus] = useState<'UNDER_REVIEW' | 'REINSPECTION_REQUESTED' | 'RESOLVED'>('UNDER_REVIEW');
   const [submitting, setSubmitting] = useState(false);
 
-  useEffect(() => {
-    fetchDisputes();
-  }, []);
-
   const fetchDisputes = async () => {
     try {
-      setLoading(true);
       const data = await api.getDisputes();
       setDisputes(data);
       if (data.length > 0) {
@@ -42,10 +27,30 @@ export const FarmerBuyerComparisonView: React.FC = () => {
       }
     } catch (err) {
       console.error('Error fetching disputes:', err);
-    } finally {
-      setLoading(false);
     }
   };
+
+  useEffect(() => {
+    let isMounted = true;
+    (async () => {
+      try {
+        const data = await api.getDisputes();
+        if (isMounted) {
+          setDisputes(data);
+          if (data.length > 0) {
+            setActiveDispute(data[0]);
+          }
+        }
+      } catch (err) {
+        console.error('Error fetching disputes:', err);
+      } finally {
+        if (isMounted) setLoading(false);
+      }
+    })();
+    return () => {
+      isMounted = false;
+    };
+  }, []);
 
   const handleUpdateStatus = async (e: React.FormEvent) => {
     e.preventDefault();
