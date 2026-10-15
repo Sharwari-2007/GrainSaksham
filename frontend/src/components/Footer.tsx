@@ -1,9 +1,6 @@
 import React from 'react';
 import { Sprout, ShieldAlert, Award, FileText, CheckCircle2 } from 'lucide-react';
-import { useTranslation } from '../context/LanguageContext';
-
 export const Footer: React.FC<{ onNavigate: (view: string) => void }> = ({ onNavigate }) => {
-  const { t } = useTranslation();
 
   return (
     <footer className="bg-stone-900 text-stone-300 pt-16 pb-12 border-t border-stone-800">
