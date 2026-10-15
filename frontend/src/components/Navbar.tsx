@@ -12,7 +12,6 @@ import {
   X, 
   Globe, 
   UserCheck, 
-  Wifi, 
   WifiOff 
 } from 'lucide-react';
 import { useTranslation } from '../context/LanguageContext';
