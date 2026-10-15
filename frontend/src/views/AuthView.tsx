@@ -4,23 +4,16 @@ import {
   ShieldCheck, 
   UserCheck, 
   Lock, 
-  Mail, 
-  Phone, 
-  MapPin, 
-  Building, 
   Award, 
   CheckCircle2, 
   ArrowRight, 
   Sparkles, 
   AlertCircle, 
   KeyRound, 
-  Briefcase, 
-  FileBadge,
-  Eye,
-  EyeOff,
-  Wheat,
-  Scale,
-  BadgeCheck
+  Eye, 
+  EyeOff, 
+  Scale, 
+  BadgeCheck 
 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { useTranslation } from '../context/LanguageContext';
