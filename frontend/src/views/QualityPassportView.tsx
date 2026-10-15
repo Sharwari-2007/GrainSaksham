@@ -2,11 +2,8 @@ import React, { useRef, useState } from 'react';
 import { QRCodeSVG } from 'qrcode.react';
 import { 
   Download, 
-  Share2, 
-  CheckCircle2, 
   ShieldCheck, 
   Lock, 
-  ExternalLink, 
   FileCheck, 
   Copy, 
   Check, 
@@ -67,10 +64,8 @@ export const QualityPassportView: React.FC<QualityPassportViewProps> = ({
         format: 'a4'
       });
       const imgWidth = 210;
-      const pageHeight = 297;
       const imgHeight = (canvas.height * imgWidth) / canvas.width;
-      let heightLeft = imgHeight;
-      let position = 0;
+      const position = 0;
 
       pdf.addImage(imgData, 'JPEG', 0, position, imgWidth, imgHeight);
       pdf.save(`GrainSaksham_Passport_${inspection.reportId}.pdf`);
